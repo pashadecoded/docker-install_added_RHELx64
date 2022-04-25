@@ -455,8 +455,24 @@ do_install() {
 			;;
 		centos|fedora|rhel)
 			if [ "$(uname -m)" != "s390x" ] && [ "$lsb_dist" = "rhel" ]; then
-				echo "Packages for RHEL are currently only available for s390x."
-				exit 1
+				cat >&2 <<-'EOF'
+
+			Warning: RHEL x64 DETECTED: Packages for RHEL are currently only available for s390x.
+            
+            We recommend installing Docker for Centos.
+
+			If you do not wish to install docker for centos on rhel using this script.
+
+			You may press Ctrl+C now to abort this script.
+            
+		EOF
+		    echo
+            ( set -x; sleep 20 )
+            
+            sudo yum install -y yum-utils
+            sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+            sudo yum install docker-ce docker-ce-cli containerd.io
+            exit 1
 			fi
 			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			if ! curl -Ifs "$yum_repo" > /dev/null; then
